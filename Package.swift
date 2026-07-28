@@ -1,8 +1,13 @@
 // swift-tools-version:5.8
 import PackageDescription
 
-// Use the local binary if true
-let useLocalBinary = Context.environment["VALHALLA_MOBILE_DEV"].flatMap(Bool.init) ?? false
+// Use the local binary if true.
+//
+// Contour fork: defaults to the locally built xcframework, because the
+// published release binary does not carry the trace_route, trace_attributes,
+// and height actions this fork adds. Do NOT include this line in the upstream
+// pull request — upstream must keep defaulting to its published binary.
+let useLocalBinary = Context.environment["VALHALLA_MOBILE_DEV"].flatMap(Bool.init) ?? true
 
 // Use the local binary
 var binaryTarget: Target = .binaryTarget(

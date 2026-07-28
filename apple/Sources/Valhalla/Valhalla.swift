@@ -9,6 +9,18 @@ public protocol ValhallaProviding {
     init(configPath: String) throws
 
     func route(request: RouteRequest) throws -> RouteResponse
+
+    /// Map-matches a GPS trace against the road graph and returns narrative
+    /// maneuvers for it.
+    func traceRoute(rawRequest request: String) -> String
+
+    /// Map-matches a GPS trace and returns the matched edges and their
+    /// attributes rather than narrative directions.
+    func traceAttributes(rawRequest request: String) -> String
+
+    /// Samples terrain heights under a shape, from the elevation data the
+    /// config points at.
+    func height(rawRequest request: String) -> String
 }
 
 public final class Valhalla: ValhallaProviding {
@@ -58,5 +70,17 @@ public final class Valhalla: ValhallaProviding {
 
     public func route(rawRequest request: String) -> String {
         actor!.route(request)
+    }
+
+    public func traceRoute(rawRequest request: String) -> String {
+        actor!.traceRoute(request)
+    }
+
+    public func traceAttributes(rawRequest request: String) -> String {
+        actor!.traceAttributes(request)
+    }
+
+    public func height(rawRequest request: String) -> String {
+        actor!.height(request)
     }
 }

@@ -53,24 +53,52 @@ void delete_valhalla_actor(void* actor) {
     delete ((ValhallaActor*) actor);
 }
 
-std::string route(const char *request, void* actor) {
+// Every action reports failure the same way: a JSON object carrying
+// Valhalla's own error code and message, so the caller can decode one shape
+// whichever action it asked for.
+static std::string invoke_action(const char *action,
+                                 const std::function<std::string()>& work) {
     std::string result;
     try {
-        result = ((ValhallaActor*) actor)->route(request);
+        result = work();
     } catch (const valhalla::valhalla_exception_t &err) {
-        printf("[ValhallaActor] route valhalla_exception: %s\n", err.what());
+        printf("[ValhallaActor] %s valhalla_exception: %s\n", action, err.what());
         std::string code = std::to_string(err.code);
         std::string message = err.message.c_str();
 
         result = "{\"code\":" + code + ",\"message\":\"" + message + "\"}";
     } catch (const std::exception &err) {
-        printf("[ValhallaActor] route std::exception: %s\n", err.what());
+        printf("[ValhallaActor] %s std::exception: %s\n", action, err.what());
         result = "{\"code\":-1,\"message\":\"" + std::string(err.what()) + "\"}";
     } catch (...) {
-        printf("[ValhallaActor] route unknown exception");
+        printf("[ValhallaActor] %s unknown exception", action);
         result = "{\"code\":-1,\"message\":\"unknown exception\"}";
     }
 
     return result;
+}
+
+std::string route(const char *request, void* actor) {
+    return invoke_action("route", [request, actor]() {
+        return ((ValhallaActor*) actor)->route(request);
+    });
+}
+
+std::string trace_route(const char *request, void* actor) {
+    return invoke_action("trace_route", [request, actor]() {
+        return ((ValhallaActor*) actor)->trace_route(request);
+    });
+}
+
+std::string trace_attributes(const char *request, void* actor) {
+    return invoke_action("trace_attributes", [request, actor]() {
+        return ((ValhallaActor*) actor)->trace_attributes(request);
+    });
+}
+
+std::string height(const char *request, void* actor) {
+    return invoke_action("height", [request, actor]() {
+        return ((ValhallaActor*) actor)->height(request);
+    });
 }
 #endif
