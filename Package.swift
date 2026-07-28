@@ -3,11 +3,12 @@ import PackageDescription
 
 // Use the local binary if true.
 //
-// Contour fork: defaults to the locally built xcframework, because the
-// published release binary does not carry the trace_route, trace_attributes,
-// and height actions this fork adds. Do NOT include this line in the upstream
-// pull request — upstream must keep defaulting to its published binary.
-let useLocalBinary = Context.environment["VALHALLA_MOBILE_DEV"].flatMap(Bool.init) ?? true
+// Contour fork: back to upstream's default of false, now that this fork
+// publishes its own xcframework. It briefly defaulted to true, which made the
+// package build only on the one Mac that had the binary sitting in `build/`
+// — a directory .gitignore excludes — so a clean checkout and every CI runner
+// resolved a package they could not build.
+let useLocalBinary = Context.environment["VALHALLA_MOBILE_DEV"].flatMap(Bool.init) ?? false
 
 // Use the local binary
 var binaryTarget: Target = .binaryTarget(
@@ -15,11 +16,13 @@ var binaryTarget: Target = .binaryTarget(
     path: "build/apple/valhalla-wrapper.xcframework"
 )
 
-// CI will replace the nils with the actual values when building a release
-let version: String = "0.5.1"
+// This fork's own build, because upstream's 0.5.1 binary exposes only the
+// `route` action — the whole reason the fork exists. Built for arm64 device
+// and arm64 simulator by scripts/create_xcframework_apple_silicon.sh.
+let version: String = "contour-0.5.1-actions"
 let binaryURL: String =
-    "https://github.com/Rallista/valhalla-mobile/releases/download/\(version)/valhalla-wrapper.xcframework.zip"
-let binaryChecksum: String = "0464877f9297ca9462f57c43f5ffa4825c3fed0653300c2de22cd78422d6d560"
+    "https://github.com/tristanpinto/valhalla-mobile/releases/download/\(version)/valhalla-wrapper.xcframework.zip"
+let binaryChecksum: String = "c3f1f06b58dd56982e339a972a6a2f62335afd157df22fb3ad90497f5b3ca732"
 
 if !useLocalBinary {
     binaryTarget = .binaryTarget(
