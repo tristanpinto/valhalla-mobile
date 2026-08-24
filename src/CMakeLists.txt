@@ -139,3 +139,19 @@ endif()
 install(TARGETS
         valhalla-wrapper
         DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
+
+# Local benchmark driver; never built by default. See wrapper/bench.cpp.
+if(BENCH_DRIVER)
+    add_executable(bench wrapper/bench.cpp)
+    target_link_libraries(bench
+        PRIVATE
+        valhalla-wrapper
+        ${Protobuf_LIBRARIES}
+        absl::base
+        absl::log
+        absl::strings
+        absl::status
+        Boost::boost
+        valhalla)
+    target_include_directories(bench PRIVATE ${Boost_INCLUDE_DIRS} ${VALHALLA_SOURCE_DIR})
+endif()
